@@ -4,6 +4,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from.models import ContactMessage
+
 
 def register(request):
     if request.method == 'POST':
@@ -52,4 +55,31 @@ def logout_view(request):
 def home(request):
     return render(request,'home.html')
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import ContactMessage
 
+def contact(request):
+    if request.method == "POST":
+        name = request.POST.get('name', '')
+        email = request.POST.get('email', '')
+        phone_number = request.POST.get('phone_number', '')
+        message = request.POST.get('message', '')
+        
+        if name and email and phone_number and message:
+            # Save the message to the database
+            ContactMessage.objects.create(name=name, email=email, phone_number=phone_number, message=message)
+            
+            # Success message
+            messages.success(request, "Your message has been sent successfully!")
+            
+            # Redirect to prevent re-posting the form data on refresh
+            return redirect('contact')
+        else:
+            # Error message if any field is empty
+            messages.error(request, "Please fill in all fields.")
+    
+    # Render the contact form
+    return render(request, 'contact.html')
+
+     
